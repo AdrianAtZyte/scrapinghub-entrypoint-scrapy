@@ -6,6 +6,7 @@ build-backend = "hatchling.build"
 name = "scrapinghub-entrypoint-scrapy"
 description = "Scrapy entrypoint for Scrapinghub job runner"
 dependencies = [
+    "formerly>=0.1.0",
     "Scrapy>=2.7",
     "Twisted>=21.7.0",
     "scrapinghub>=2.4.0",
