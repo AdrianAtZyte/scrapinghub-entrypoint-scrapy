@@ -217,3 +217,15 @@ def test_hs_middlewares_retry(hs_downloader_middleware, hs_spider_middleware):
 
     assert request_2.meta[HS_REQUEST_ID_KEY] == 2
     assert request_2.meta[HS_PARENT_ID_KEY] == 0
+
+
+def test_hs_spider_middleware_response_without_request(hs_spider_middleware):
+    spider = Spider('test')
+    request = Request('http://resp-url/1')
+    response = Response('http://resp-url')
+    if _SCRAPY_NO_SPIDER_ARG:
+        output = list(hs_spider_middleware.process_spider_output(response, [request]))
+    else:
+        output = list(hs_spider_middleware.process_spider_output(response, [request], spider))
+    assert output == [request]
+    assert request.meta[HS_PARENT_ID_KEY] is None
