@@ -5,6 +5,7 @@ import pytest
 import sys
 from scrapy import Spider, Request, Item
 from scrapy.http import Response
+from scrapy.utils.defer import deferred_f_from_coro_f
 from scrapy.utils.test import get_crawler
 from typing import Optional
 
@@ -227,5 +228,23 @@ def test_hs_spider_middleware_response_without_request(hs_spider_middleware):
         output = list(hs_spider_middleware.process_spider_output(response, [request]))
     else:
         output = list(hs_spider_middleware.process_spider_output(response, [request], spider))
+    assert output == [request]
+    assert request.meta[HS_PARENT_ID_KEY] is None
+
+
+@deferred_f_from_coro_f
+async def test_hs_spider_middleware_response_without_request_async(hs_spider_middleware):
+    spider = Spider('test')
+    request = Request('http://resp-url/1')
+    response = Response('http://resp-url')
+
+    async def result():
+        yield request
+
+    if _SCRAPY_NO_SPIDER_ARG:
+        output_iter = hs_spider_middleware.process_spider_output_async(response, result())
+    else:
+        output_iter = hs_spider_middleware.process_spider_output_async(response, result(), spider)
+    output = [x async for x in output_iter]
     assert output == [request]
     assert request.meta[HS_PARENT_ID_KEY] is None
